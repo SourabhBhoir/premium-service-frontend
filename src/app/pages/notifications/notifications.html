@@ -1,0 +1,344 @@
+<div class="notifications-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">PREMIUM MANAGEMENT</p>
+      <h1>Notifications</h1>
+      <p class="page-description">
+        Create notifications, review notification history and check pending items.
+      </p>
+    </div>
+
+    <div class="service-badge">
+      <span class="service-dot"></span>
+      Premium Service
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <div class="summary-icon blue">✉</div>
+      <div>
+        <span class="summary-label">History Records</span>
+        <h2>{{ notifications.length }}</h2>
+        <p>Records returned by the API</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <div class="summary-icon orange">◷</div>
+      <div>
+        <span class="summary-label">Pending Records</span>
+        <h2>{{ pendingNotifications.length }}</h2>
+        <p>Pending items returned by the API</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <div class="summary-icon green">✓</div>
+      <div>
+        <span class="summary-label">Selected Notification</span>
+        <h2>{{ notificationDetails ? '#' + (notificationDetails['notificationId'] ?? notificationId) : '—' }}</h2>
+        <p>{{ notificationDetails ? getNotificationStatus(notificationDetails) : 'No record selected' }}</p>
+      </div>
+    </article>
+  </section>
+
+  @if (errorMessage) {
+    <div class="message error-message" role="alert">
+      <span class="message-symbol">!</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="message success-message" role="status">
+      <span class="message-symbol">✓</span>
+      <span>{{ successMessage }}</span>
+    </div>
+  }
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Create Notification</h2>
+        <p>Submit a notification using the backend NotificationRequest fields.</p>
+      </div>
+    </div>
+
+    <form class="notification-form" (ngSubmit)="createNotification()">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="notificationType">Notification Type</label>
+          <select
+            id="notificationType"
+            name="notificationType"
+            [(ngModel)]="notificationForm.notificationType"
+            required
+          >
+            @for (type of notificationTypes; track type) {
+              <option [value]="type">{{ type.replaceAll('_', ' ') }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="recipient">Recipient Email</label>
+          <input
+            id="recipient"
+            name="recipient"
+            type="email"
+            [(ngModel)]="notificationForm.recipient"
+            placeholder="customer@example.com"
+            required
+          />
+        </div>
+
+        <div class="form-field full-width">
+          <label for="subject">Subject</label>
+          <input
+            id="subject"
+            name="subject"
+            type="text"
+            maxlength="255"
+            [(ngModel)]="notificationForm.subject"
+            placeholder="Enter notification subject"
+            required
+          />
+        </div>
+
+        <div class="form-field full-width">
+          <label for="message">Message</label>
+          <textarea
+            id="message"
+            name="message"
+            rows="4"
+            [(ngModel)]="notificationForm.message"
+            placeholder="Enter notification message"
+            required
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="submitting"
+        >
+          {{ submitting ? 'Submitting...' : 'Create Notification' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Notification History</h2>
+        <p>Search history using the recipient email address.</p>
+      </div>
+      <span class="record-count">{{ notifications.length }} records</span>
+    </div>
+
+    <form class="search-form" (ngSubmit)="loadHistory()">
+      <div class="form-field">
+        <label for="historyRecipient">Recipient Email</label>
+        <input
+          id="historyRecipient"
+          name="historyRecipient"
+          type="email"
+          [(ngModel)]="recipient"
+          placeholder="customer@example.com"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="loadingHistory"
+      >
+        {{ loadingHistory ? 'Loading...' : 'Search History' }}
+      </button>
+    </form>
+
+    @if (loadingHistory) {
+      <div class="loading-state">
+        <span class="spinner"></span>
+        <p>Loading notification history...</p>
+      </div>
+    } @else if (notifications.length > 0) {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Recipient</th>
+              <th>Subject</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of notifications; track item.notificationId ?? $index) {
+              <tr>
+                <td>{{ item.notificationId ?? '—' }}</td>
+                <td>{{ item.notificationType ?? '—' }}</td>
+                <td>{{ item.recipient ?? '—' }}</td>
+                <td>{{ item.subject ?? '—' }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="statusClass(item)">
+                    {{ getNotificationStatus(item) }}
+                  </span>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="secondary-button"
+                    (click)="notificationId = item.notificationId ?? 0; loadNotification()"
+                  >
+                    View
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">✉</div>
+        <h3>No history records to display</h3>
+        <p>Enter a recipient email and search for notifications.</p>
+      </div>
+    }
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Pending Notifications</h2>
+        <p>Retrieve pending records from the backend.</p>
+      </div>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="loadPending()"
+        [disabled]="loadingPending"
+      >
+        {{ loadingPending ? 'Loading...' : 'Load Pending' }}
+      </button>
+    </div>
+
+    @if (loadingPending) {
+      <div class="loading-state">
+        <span class="spinner"></span>
+        <p>Loading pending notifications...</p>
+      </div>
+    } @else if (pendingNotifications.length > 0) {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Recipient</th>
+              <th>Subject</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of pendingNotifications; track item.notificationId ?? $index) {
+              <tr>
+                <td>{{ item.notificationId ?? '—' }}</td>
+                <td>{{ item.notificationType ?? '—' }}</td>
+                <td>{{ item.recipient ?? '—' }}</td>
+                <td>{{ item.subject ?? '—' }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="statusClass(item)">
+                    {{ getNotificationStatus(item) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state compact-empty">
+        <p>No pending records are currently displayed. Click Load Pending to query the backend.</p>
+      </div>
+    }
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Notification Details</h2>
+        <p>Retrieve an individual notification by ID.</p>
+      </div>
+    </div>
+
+    <form class="search-form details-search" (ngSubmit)="loadNotification()">
+      <div class="form-field">
+        <label for="notificationId">Notification ID</label>
+        <input
+          id="notificationId"
+          name="notificationId"
+          type="number"
+          min="1"
+          [(ngModel)]="notificationId"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="loadingDetails"
+      >
+        {{ loadingDetails ? 'Loading...' : 'Get Details' }}
+      </button>
+    </form>
+
+    @if (loadingDetails) {
+      <div class="loading-state">
+        <span class="spinner"></span>
+        <p>Loading notification details...</p>
+      </div>
+    } @else if (notificationDetails) {
+      <div class="details-grid">
+        @for (
+          item of [
+            { label: 'Notification ID', key: 'notificationId' },
+            { label: 'Type', key: 'notificationType' },
+            { label: 'Recipient', key: 'recipient' },
+            { label: 'Subject', key: 'subject' },
+            { label: 'Message', key: 'message' },
+            { label: 'Status', key: 'status' },
+            { label: 'Created At', key: 'createdAt' },
+            { label: 'Sent At', key: 'sentAt' }
+          ];
+          track item.key
+        ) {
+          @if (notificationDetails[item.key] !== undefined && notificationDetails[item.key] !== null) {
+            <div class="detail-item">
+              <span>{{ item.label }}</span>
+              <strong>{{ notificationDetails[item.key] }}</strong>
+            </div>
+          }
+        }
+      </div>
+    } @else {
+      <div class="empty-state compact-empty">
+        <p>No notification selected. Enter an ID and click Get Details.</p>
+      </div>
+    }
+  </section>
+
+  <footer class="page-footer">
+    Notification records and statuses are returned by the Premium Service backend.
+  </footer>
+</div>

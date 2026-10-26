@@ -1,0 +1,87 @@
+
+<div class="app-shell" [class.sidebar-collapsed]="!sidebarOpen">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">I</div>
+      <div class="brand-text">
+        <strong>InsureFlow</strong>
+        <span>Premium Management</span>
+      </div>
+    </div>
+
+    <div class="menu-label">WORKSPACE</div>
+
+    <nav class="navigation">
+      <a routerLink="/" routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <span class="nav-icon">▦</span>
+        <span class="nav-text">Dashboard</span>
+      </a>
+
+      <a routerLink="/premium-schedules" routerLinkActive="active">
+        <span class="nav-icon">▤</span>
+        <span class="nav-text">Premium Schedules</span>
+      </a>
+
+      <a routerLink="/payments" routerLinkActive="active">
+        <span class="nav-icon">₹</span>
+        <span class="nav-text">Payments</span>
+      </a>
+
+      <a routerLink="/refunds" routerLinkActive="active">
+        <span class="nav-icon">↩</span>
+        <span class="nav-text">Refunds</span>
+      </a>
+
+      <a routerLink="/receipts" routerLinkActive="active">
+        <span class="nav-icon">▧</span>
+        <span class="nav-text">Payment Receipts</span>
+      </a>
+
+      <a routerLink="/notifications" routerLinkActive="active">
+        <span class="nav-icon">♧</span>
+        <span class="nav-text">Notifications</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="profile-avatar">SA</div>
+      <div class="profile-info">
+        <strong>Sourabh</strong>
+        <span>Premium Service</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-area">
+    <header class="topbar">
+      <button class="menu-toggle" (click)="toggleSidebar()"
+              aria-label="Toggle sidebar">☰</button>
+
+      <div class="breadcrumb">
+        <span>Workspace</span>
+        <span class="breadcrumb-divider">/</span>
+        <strong>Premium Management</strong>
+      </div>
+
+      <div class="topbar-right">
+        <span class="environment-badge">
+          <span class="status-dot"></span>
+          Premium Service
+        </span>
+        <div class="top-avatar">SA</div>
+      </div>
+    </header>
+
+    <section class="page-content">
+      <router-outlet></router-outlet>
+    </section>
+
+    <footer class="app-footer">
+      <span>InsureFlow · Premium Management</span>
+      <span>Insurance Management System</span>
+    </footer>
+  </main>
+
+</div>

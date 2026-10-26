@@ -1,0 +1,245 @@
+
+<div class="schedules-page">
+
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">PREMIUM MANAGEMENT / SCHEDULES</div>
+      <h1>Premium Schedules</h1>
+      <p>Manage policy premium plans, installment dates and payment statuses.</p>
+    </div>
+
+    <button class="primary-button" (click)="showCreateForm = !showCreateForm">
+      <span>＋</span> Create Schedule
+    </button>
+  </div>
+
+  <div class="alert success-alert" *ngIf="successMessage">
+    <span>✓</span> {{ successMessage }}
+    <button (click)="successMessage = ''">×</button>
+  </div>
+
+  <div class="alert error-alert" *ngIf="errorMessage">
+    <span>!</span> {{ errorMessage }}
+    <button (click)="errorMessage = ''">×</button>
+  </div>
+
+  <section class="search-panel">
+    <div class="search-title">
+      <div class="search-icon">⌕</div>
+      <div>
+        <h2>Find Premium Schedule</h2>
+        <p>Enter a policy ID to retrieve its installments.</p>
+      </div>
+    </div>
+
+    <form class="search-form" (ngSubmit)="loadSchedules()">
+      <label>
+        Policy ID
+        <input
+          type="number"
+          name="policyId"
+          [(ngModel)]="policyId"
+          min="1"
+          required
+          placeholder="Enter policy ID"
+        />
+      </label>
+
+      <button class="primary-button" type="submit" [disabled]="loading">
+        {{ loading ? 'Loading...' : 'Search Schedule' }}
+      </button>
+    </form>
+  </section>
+
+  <section class="create-panel" *ngIf="showCreateForm">
+    <div class="panel-heading">
+      <div>
+        <h2>Create Premium Schedule</h2>
+        <p>Enter the policy and installment details.</p>
+      </div>
+      <button class="close-button" type="button" (click)="showCreateForm = false">×</button>
+    </div>
+
+    <form (ngSubmit)="createSchedule()" #scheduleForm="ngForm">
+      <div class="form-grid">
+
+        <label>
+          Policy ID *
+          <input
+            type="number"
+            name="formPolicyId"
+            [(ngModel)]="form.policyId"
+            min="1"
+            required
+          />
+        </label>
+
+        <label>
+          Installments *
+          <input
+            type="number"
+            name="totalInstallments"
+            [(ngModel)]="form.totalInstallments"
+            min="1"
+            max="120"
+            required
+          />
+        </label>
+
+        <label>
+          Premium Amount per Installment (₹) *
+          <input
+            type="number"
+            name="premiumAmount"
+            [(ngModel)]="form.premiumAmount"
+            min="0.01"
+            step="0.01"
+            required
+          />
+        </label>
+
+        <label>
+          Payment Frequency *
+          <select
+            name="paymentFrequency"
+            [(ngModel)]="form.paymentFrequency"
+            required
+          >
+            <option value="MONTHLY">Monthly</option>
+            <option value="QUARTERLY">Quarterly</option>
+            <option value="HALF_YEARLY">Half Yearly</option>
+            <option value="YEARLY">Yearly</option>
+          </select>
+        </label>
+
+        <label>
+          First Due Date
+          <input
+            type="date"
+            name="firstDueDate"
+            [(ngModel)]="form.firstDueDate"
+          />
+        </label>
+
+      </div>
+
+      <div class="form-note">
+        <span>ⓘ</span>
+        This form submits data to the deployed Premium Service API.
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="showCreateForm = false"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="creating || scheduleForm.invalid"
+        >
+          {{ creating ? 'Creating...' : 'Create Schedule' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="table-panel">
+    <div class="table-heading">
+      <div>
+        <h2>Installment Details</h2>
+        <p>Premium schedule records returned by the backend.</p>
+      </div>
+
+      <span class="record-count">{{ schedules.length }} records</span>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <span class="loader"></span>
+      Loading premium schedules...
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && schedules.length === 0">
+      <div class="empty-icon">▤</div>
+      <h3>No schedules to display</h3>
+      <p>Search using a valid policy ID to load schedule records.</p>
+      <button class="secondary-button" (click)="loadSchedules()">
+        Try Again
+      </button>
+    </div>
+
+    <div class="table-wrapper" *ngIf="!loading && schedules.length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>Schedule ID</th>
+            <th>Installment</th>
+            <th>Due Date</th>
+            <th>Premium Amount</th>
+            <th>Frequency</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let schedule of schedules; trackBy: trackBySchedule">
+            <td>
+              <span class="id-value">#{{ schedule.scheduleId }}</span>
+            </td>
+
+            <td>
+              <strong>{{ schedule.installmentNo }}</strong>
+              <span class="sub-value">of {{ schedule.totalInstallments }}</span>
+            </td>
+
+            <td>{{ schedule.dueDate | date:'dd MMM yyyy' }}</td>
+
+            <td class="amount">
+              {{ schedule.premiumAmount | currency:'INR':'symbol':'1.2-2' }}
+            </td>
+
+            <td>{{ schedule.paymentFrequency.replace('_', ' ') }}</td>
+
+            <td>
+              <span class="status-badge"
+                [class.status-paid]="schedule.status === 'PAID'"
+                [class.status-pending]="schedule.status === 'PENDING'"
+                [class.status-overdue]="schedule.status === 'OVERDUE'">
+                <span class="status-dot"></span>
+                {{ schedule.status }}
+              </span>
+            </td>
+
+            <td>
+              <select
+                class="status-select"
+                [ngModel]="schedule.status"
+                [ngModelOptions]="{standalone: true}"
+                (ngModelChange)="updateStatus(schedule, $event)"
+                aria-label="Update installment status"
+              >
+                <option value="PENDING">Pending</option>
+                <option value="PAID">Paid</option>
+                <option value="OVERDUE">Overdue</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer" *ngIf="schedules.length > 0">
+      Showing {{ schedules.length }} returned installment records
+    </div>
+  </section>
+
+  <div class="page-footnote">
+    Schedule information is retrieved from the Premium Service backend.
+  </div>
+
+</div>

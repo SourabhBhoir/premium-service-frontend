@@ -1,0 +1,339 @@
+
+<div class="payments-page">
+
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">PREMIUM MANAGEMENT / PAYMENTS</div>
+      <h1>Premium Payments</h1>
+      <p>Initiate payments, track transactions and review payment history.</p>
+    </div>
+
+    <button class="primary-button"
+      (click)="showPaymentForm = !showPaymentForm">
+      ＋ Initiate Payment
+    </button>
+  </div>
+
+  <div class="alert success-alert" *ngIf="successMessage">
+    <span>✓</span>
+    <span>{{ successMessage }}</span>
+    <button (click)="successMessage = ''">×</button>
+  </div>
+
+  <div class="alert error-alert" *ngIf="errorMessage">
+    <span>!</span>
+    <span>{{ errorMessage }}</span>
+    <button (click)="errorMessage = ''">×</button>
+  </div>
+
+  <section class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-icon blue-icon">₹</div>
+      <div>
+        <span>Payments Found</span>
+        <h2>{{ payments.length }}</h2>
+        <p>For selected policy</p>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon green-icon">✓</div>
+      <div>
+        <span>Successful Payments</span>
+        <h2>{{ countPayments('SUCCESS') }}</h2>
+        <p>Based on returned statuses</p>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon orange-icon">◷</div>
+      <div>
+        <span>Pending Payments</span>
+        <h2>{{ countPayments('PENDING') }}</h2>
+        <p>Based on returned statuses</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="search-panel">
+    <div>
+      <h2>Payment History</h2>
+      <p>Search transactions using the policy ID.</p>
+    </div>
+
+    <form class="search-form" (ngSubmit)="loadHistory()">
+      <label>
+        Policy ID
+        <input
+          type="number"
+          name="policyId"
+          [(ngModel)]="policyId"
+          min="1"
+          required
+        />
+      </label>
+
+      <button type="submit" class="primary-button" [disabled]="loading">
+        {{ loading ? 'Loading...' : 'Search History' }}
+      </button>
+    </form>
+  </section>
+
+  <section class="form-panel" *ngIf="showPaymentForm">
+    <div class="panel-heading">
+      <div>
+        <h2>Initiate Premium Payment</h2>
+        <p>Enter the details required by the Premium Service API.</p>
+      </div>
+      <button class="close-button"
+        type="button"
+        (click)="showPaymentForm = false">×</button>
+    </div>
+
+    <form (ngSubmit)="initiatePayment()" #paymentNgForm="ngForm">
+      <div class="form-grid">
+
+        <label>
+          Policy ID *
+          <input
+            type="number"
+            name="formPolicyId"
+            [(ngModel)]="paymentForm.policyId"
+            min="1"
+            required
+          />
+        </label>
+
+        <label>
+          Schedule ID *
+          <input
+            type="number"
+            name="scheduleId"
+            [(ngModel)]="paymentForm.scheduleId"
+            min="1"
+            required
+          />
+        </label>
+
+        <label>
+          Amount (₹) *
+          <input
+            type="number"
+            name="amountPaid"
+            [(ngModel)]="paymentForm.amountPaid"
+            min="0.01"
+            step="0.01"
+            required
+          />
+        </label>
+
+        <label>
+          Payment Mode *
+          <select
+            name="paymentMode"
+            [(ngModel)]="paymentForm.paymentMode"
+            required
+          >
+            <option *ngFor="let mode of paymentModes" [value]="mode">
+              {{ mode.replace('_', ' ') }}
+            </option>
+          </select>
+        </label>
+
+      </div>
+
+      <div class="form-note">
+        Payment initiation creates a request through the deployed backend.
+        It does not by itself confirm that money was received.
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="secondary-button"
+          (click)="showPaymentForm = false">
+          Cancel
+        </button>
+
+        <button type="submit" class="primary-button"
+          [disabled]="submitting || paymentNgForm.invalid">
+          {{ submitting ? 'Processing...' : 'Initiate Payment' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="table-panel">
+    <div class="table-heading">
+      <div>
+        <h2>Transaction Records</h2>
+        <p>Payment history returned by the backend.</p>
+      </div>
+
+      <span class="record-count">{{ payments.length }} records</span>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <span class="loader"></span>
+      Loading payment records...
+    </div>
+
+    <div class="empty-state"
+      *ngIf="!loading && payments.length === 0">
+      <div class="empty-icon">₹</div>
+      <h3>No payment records to display</h3>
+      <p>Search a policy ID to retrieve its payment history.</p>
+    </div>
+
+    <div class="table-wrapper"
+      *ngIf="!loading && payments.length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>Payment ID</th>
+            <th>Policy ID</th>
+            <th>Schedule ID</th>
+            <th>Amount</th>
+            <th>Payment Mode</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let payment of payments">
+            <td class="id-value">#{{ payment.paymentId }}</td>
+            <td>{{ payment.policyId }}</td>
+            <td>{{ payment.scheduleId }}</td>
+            <td class="amount">
+              {{ payment.amountPaid | currency:'INR':'symbol':'1.2-2' }}
+            </td>
+            <td>{{ payment.paymentMode || '—' }}</td>
+            <td>
+              {{ payment.paymentDate
+                ? (payment.paymentDate | date:'dd MMM yyyy')
+                : '—' }}
+            </td>
+            <td>
+              <span class="status-badge"
+                [ngClass]="statusClass(payment.paymentStatus)">
+                {{ payment.paymentStatus || 'UNKNOWN' }}
+              </span>
+            </td>
+            <td>
+              <button class="view-button"
+                type="button"
+                (click)="paymentId = payment.paymentId; loadPayment()">
+                View
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="details-panel" *ngIf="paymentDetails">
+    <div class="panel-heading">
+      <div>
+        <h2>Payment Details — #{{ paymentDetails.paymentId }}</h2>
+        <p>Details returned by the payment API.</p>
+      </div>
+
+      <button class="close-button"
+        (click)="paymentDetails = null">×</button>
+    </div>
+
+    <div class="details-grid">
+      <div>
+        <span>Policy ID</span>
+        <strong>{{ paymentDetails.policyId }}</strong>
+      </div>
+      <div>
+        <span>Schedule ID</span>
+        <strong>{{ paymentDetails.scheduleId }}</strong>
+      </div>
+      <div>
+        <span>Amount Paid</span>
+        <strong>{{ paymentDetails.amountPaid
+          | currency:'INR':'symbol':'1.2-2' }}</strong>
+      </div>
+      <div>
+        <span>Payment Mode</span>
+        <strong>{{ paymentDetails.paymentMode || '—' }}</strong>
+      </div>
+      <div>
+        <span>Payment Status</span>
+        <strong>{{ paymentDetails.paymentStatus || 'UNKNOWN' }}</strong>
+      </div>
+      <div>
+        <span>Gateway Order ID</span>
+        <strong>{{ paymentDetails.gatewayOrderId || '—' }}</strong>
+      </div>
+      <div>
+        <span>Gateway Payment ID</span>
+        <strong>{{ paymentDetails.gatewayPaymentId || '—' }}</strong>
+      </div>
+      <div>
+        <span>Transaction Reference</span>
+        <strong>{{ paymentDetails.transactionReference || '—' }}</strong>
+      </div>
+    </div>
+
+    <button class="secondary-button verification-toggle"
+      type="button"
+      (click)="showVerificationForm = !showVerificationForm">
+      {{ showVerificationForm ? 'Hide Verification' : 'Verify Gateway Payment' }}
+    </button>
+
+    <div class="verification-form" *ngIf="showVerificationForm">
+      <div class="form-note">
+        Enter genuine gateway values. Verification is performed by the backend.
+      </div>
+
+      <form (ngSubmit)="verifyPayment()" #verifyNgForm="ngForm">
+        <div class="form-grid">
+
+          <label>
+            Gateway Order ID *
+            <input
+              name="gatewayOrderId"
+              [(ngModel)]="verificationForm.gatewayOrderId"
+              required
+            />
+          </label>
+
+          <label>
+            Gateway Payment ID *
+            <input
+              name="gatewayPaymentId"
+              [(ngModel)]="verificationForm.gatewayPaymentId"
+              required
+            />
+          </label>
+
+          <label class="signature-field">
+            Gateway Signature *
+            <input
+              name="gatewaySignature"
+              [(ngModel)]="verificationForm.gatewaySignature"
+              required
+            />
+          </label>
+
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button"
+            [disabled]="verifying || verifyNgForm.invalid">
+            {{ verifying ? 'Verifying...' : 'Submit Verification' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <p class="page-footnote">
+    Payment status is based on the response from the Premium Service backend.
+  </p>
+
+</div>

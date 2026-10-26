@@ -1,0 +1,177 @@
+<div class="receipts-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">PREMIUM MANAGEMENT</p>
+      <h1>Payment Receipts</h1>
+      <p class="page-description">
+        Generate, retrieve and download payment receipts.
+      </p>
+    </div>
+    <div class="service-badge">
+      <span class="service-dot"></span>
+      Premium Service
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <div class="summary-icon blue">₹</div>
+      <div>
+        <span class="summary-label">Payment ID</span>
+        <h2>#{{ paymentId || '—' }}</h2>
+        <p>Selected payment</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <div class="summary-icon green">✓</div>
+      <div>
+        <span class="summary-label">Receipt Lookup</span>
+        <h2>{{ loading ? 'Loading' : receiptDetails ? 'Found' : 'Ready' }}</h2>
+        <p>Receipt API response</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <div class="summary-icon orange">PDF</div>
+      <div>
+        <span class="summary-label">PDF Receipt</span>
+        <h2>{{ downloading ? 'Preparing' : 'Available' }}</h2>
+        <p>Download when supported by backend</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel search-panel">
+    <div class="panel-intro">
+      <h2>Find a Receipt</h2>
+      <p>Enter the payment ID associated with the receipt.</p>
+    </div>
+
+    <form class="search-form" (ngSubmit)="loadReceipt()">
+      <div class="form-field">
+        <label for="paymentId">Payment ID</label>
+        <input
+          id="paymentId"
+          name="paymentId"
+          type="number"
+          min="1"
+          required
+          [(ngModel)]="paymentId"
+          placeholder="Enter payment ID"
+        />
+      </div>
+
+      <button class="primary-button" type="submit" [disabled]="loading">
+        {{ loading ? 'Loading...' : 'Search Receipt' }}
+      </button>
+    </form>
+  </section>
+
+  @if (errorMessage) {
+    <div class="message error-message" role="alert">
+      <span class="message-symbol">!</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="message success-message" role="status">
+      <span class="message-symbol">✓</span>
+      <span>{{ successMessage }}</span>
+    </div>
+  }
+
+  <section class="panel receipt-panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Receipt Details</h2>
+        <p>Details returned by the Premium Service backend.</p>
+      </div>
+
+      @if (receiptDetails) {
+        <span class="status-badge">Receipt retrieved</span>
+      }
+    </div>
+
+    @if (loading) {
+      <div class="loading-state">
+        <span class="spinner"></span>
+        <p>Loading receipt details...</p>
+      </div>
+    } @else if (receiptDetails) {
+      <div class="details-grid">
+        @for (
+          item of [
+            { label: 'Receipt ID', key: 'receiptId' },
+            { label: 'Payment ID', key: 'paymentId' },
+            { label: 'Policy ID', key: 'policyId' },
+            { label: 'Amount', key: 'amount' },
+            { label: 'Amount Paid', key: 'amountPaid' },
+            { label: 'Payment Mode', key: 'paymentMode' },
+            { label: 'Transaction Reference', key: 'transactionReference' },
+            { label: 'Receipt Number', key: 'receiptNumber' },
+            { label: 'Issued At', key: 'issuedAt' },
+            { label: 'Created At', key: 'createdAt' }
+          ];
+          track item.key
+        ) {
+          @if (receiptDetails[item.key] !== undefined && receiptDetails[item.key] !== null) {
+            <div class="detail-item">
+              <span>{{ item.label }}</span>
+              <strong>{{ receiptDetails[item.key] }}</strong>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="details-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="generateReceipt()"
+          [disabled]="generating || loading || regenerating"
+        >
+          {{ generating ? 'Generating...' : 'Generate Receipt' }}
+        </button>
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="regenerateReceipt()"
+          [disabled]="regenerating || loading || generating"
+        >
+          {{ regenerating ? 'Regenerating...' : 'Regenerate Receipt' }}
+        </button>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="downloadReceiptPdf()"
+          [disabled]="downloading || loading"
+        >
+          {{ downloading ? 'Preparing PDF...' : 'Download PDF' }}
+        </button>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">▤</div>
+        <h3>No receipt loaded</h3>
+        <p>Search using a payment ID to retrieve its receipt.</p>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="generateReceipt()"
+          [disabled]="generating || loading"
+        >
+          {{ generating ? 'Generating...' : 'Generate Receipt' }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <footer class="page-footer">
+    Receipt information and PDF availability depend on the Premium Service API response.
+  </footer>
+</div>

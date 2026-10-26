@@ -1,0 +1,173 @@
+
+<div class="dashboard">
+
+  <section class="welcome-section">
+    <div>
+      <div class="eyebrow">OVERVIEW / PREMIUM SERVICE</div>
+      <h1>Premium Dashboard</h1>
+      <p>Manage premium schedules, payments and customer transactions.</p>
+    </div>
+
+    <div class="date-label">
+      <span class="date-icon">▦</span>
+      Insurance Operations
+    </div>
+  </section>
+
+  <section class="welcome-banner">
+    <div class="banner-content">
+      <span class="banner-tag">PREMIUM OPERATIONS</span>
+      <h2>Welcome to InsureFlow</h2>
+      <p>Your workspace for premium schedules, payment tracking and service operations.</p>
+      <a routerLink="/premium-schedules" class="banner-button">
+        Explore Premium Schedules <span>→</span>
+      </a>
+    </div>
+
+    <div class="banner-art" aria-hidden="true">
+      <div class="art-circle circle-one"></div>
+      <div class="art-circle circle-two"></div>
+      <div class="art-document">
+        <div class="document-check">✓</div>
+        <div class="document-line"></div>
+        <div class="document-line short"></div>
+        <div class="document-line"></div>
+        <div class="document-line short"></div>
+      </div>
+      <div class="art-coin">₹</div>
+    </div>
+  </section>
+
+  <section class="section-heading">
+    <div>
+      <h2>Premium Operations</h2>
+      <p>Quick access to your module features</p>
+    </div>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <div class="stat-top">
+        <div class="stat-icon blue">▤</div>
+        <span class="stat-label">MODULE</span>
+      </div>
+      <h3>Premium Schedules</h3>
+      <p>Create schedules and manage installments.</p>
+      <a routerLink="/premium-schedules">Open schedules <span>→</span></a>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <div class="stat-icon green">₹</div>
+        <span class="stat-label">MODULE</span>
+      </div>
+      <h3>Premium Payments</h3>
+      <p>Initiate payments and review payment history.</p>
+      <a routerLink="/payments">Manage payments <span>→</span></a>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <div class="stat-icon orange">↩</div>
+        <span class="stat-label">MODULE</span>
+      </div>
+      <h3>Refund Management</h3>
+      <p>Create refund requests and view their status.</p>
+      <a routerLink="/refunds">Manage refunds <span>→</span></a>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">
+        <div class="stat-icon purple">▧</div>
+        <span class="stat-label">MODULE</span>
+      </div>
+      <h3>Payment Receipts</h3>
+      <p>Retrieve receipts and download PDF documents.</p>
+      <a routerLink="/receipts">View receipts <span>→</span></a>
+    </article>
+  </section>
+
+  <section class="bottom-grid">
+    <article class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Quick Actions</h2>
+          <p>Frequently used operations</p>
+        </div>
+      </div>
+
+      <a class="action-row" routerLink="/premium-schedules">
+        <span class="action-icon blue">＋</span>
+        <span class="action-copy">
+          <strong>Create Premium Schedule</strong>
+          <small>Set up policy installment dates and amounts</small>
+        </span>
+        <span class="action-arrow">→</span>
+      </a>
+
+      <a class="action-row" routerLink="/payments">
+        <span class="action-icon green">₹</span>
+        <span class="action-copy">
+          <strong>Initiate Premium Payment</strong>
+          <small>Start a payment for an installment</small>
+        </span>
+        <span class="action-arrow">→</span>
+      </a>
+
+      <a class="action-row" routerLink="/refunds">
+        <span class="action-icon orange">↩</span>
+        <span class="action-copy">
+          <strong>Request a Refund</strong>
+          <small>Create and track refund requests</small>
+        </span>
+        <span class="action-arrow">→</span>
+      </a>
+
+      <a class="action-row" routerLink="/notifications">
+        <span class="action-icon purple">♧</span>
+        <span class="action-copy">
+          <strong>View Notifications</strong>
+          <small>Review notification history and pending items</small>
+        </span>
+        <span class="action-arrow">→</span>
+      </a>
+    </article>
+
+    <article class="panel service-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Service Information</h2>
+          <p>Premium service configuration</p>
+        </div>
+      </div>
+
+      <div class="service-illustration">
+        <div class="service-shield">✓</div>
+      </div>
+
+      <div class="service-detail">
+        <span>Backend technology</span>
+        <strong>Spring Boot REST API</strong>
+      </div>
+
+      <div class="service-detail">
+        <span>Database</span>
+        <strong>MySQL on AWS RDS</strong>
+      </div>
+
+      <div class="service-detail">
+        <span>Frontend</span>
+        <strong>Angular</strong>
+      </div>
+
+      <a class="notification-link" routerLink="/notifications">
+        Open notification center <span>→</span>
+      </a>
+    </article>
+  </section>
+
+  <p class="dashboard-note">
+    Operational figures will be displayed here when connected to the backend APIs.
+  </p>
+
+</div>

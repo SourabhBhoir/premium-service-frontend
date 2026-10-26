@@ -1,0 +1,150 @@
+<div class="refunds-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">PREMIUM MANAGEMENT</p>
+      <h1>Refund Management</h1>
+      <p class="page-description">
+        Retrieve refund records, review their status and manage refund approvals.
+      </p>
+    </div>
+    <div class="service-badge">
+      <span class="service-dot"></span>
+      Premium Service
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <div class="summary-icon purple">₹</div>
+      <div>
+        <span class="summary-label">Current Refund</span>
+        <h2>{{ refundDetails ? '#' + (refundDetails['refundId'] ?? refundId) : '—' }}</h2>
+        <p>Selected refund record</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <div class="summary-icon green">✓</div>
+      <div>
+        <span class="summary-label">Refund Status</span>
+        <h2 class="status-heading">{{ refundDetails ? getRefundStatus() : '—' }}</h2>
+        <p>Status returned by backend</p>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <div class="summary-icon orange">↻</div>
+      <div>
+        <span class="summary-label">Record Lookup</span>
+        <h2>{{ loading ? 'Loading' : refundDetails ? 'Found' : 'Ready' }}</h2>
+        <p>Refund details lookup</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel search-panel">
+    <div class="panel-intro">
+      <h2>Find a Refund</h2>
+      <p>Enter the refund ID provided by the Premium Service.</p>
+    </div>
+
+    <form class="search-form" (ngSubmit)="loadRefund()">
+      <div class="form-field">
+        <label for="refundId">Refund ID</label>
+        <input
+          id="refundId"
+          name="refundId"
+          type="number"
+          min="1"
+          required
+          [(ngModel)]="refundId"
+          placeholder="Enter refund ID"
+        />
+      </div>
+
+      <button type="submit" class="primary-button" [disabled]="loading">
+        {{ loading ? 'Loading...' : 'Search Refund' }}
+      </button>
+    </form>
+  </section>
+
+  @if (errorMessage) {
+    <div class="message error-message" role="alert">
+      <span class="message-symbol">!</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="message success-message" role="status">
+      <span class="message-symbol">✓</span>
+      <span>{{ successMessage }}</span>
+    </div>
+  }
+
+  <section class="panel details-panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Refund Details</h2>
+        <p>Information returned by the backend API.</p>
+      </div>
+
+      @if (refundDetails) {
+        <span class="status-badge" [ngClass]="statusClass()">
+          {{ getRefundStatus() }}
+        </span>
+      }
+    </div>
+
+    @if (loading) {
+      <div class="loading-state">
+        <span class="spinner"></span>
+        <p>Loading refund details...</p>
+      </div>
+    } @else if (refundDetails) {
+      <div class="details-grid">
+        @for (
+          item of [
+            { label: 'Refund ID', key: 'refundId' },
+            { label: 'Payment ID', key: 'paymentId' },
+            { label: 'Policy ID', key: 'policyId' },
+            { label: 'Refund Amount', key: 'refundAmount' },
+            { label: 'Amount', key: 'amount' },
+            { label: 'Reason', key: 'reason' },
+            { label: 'Created At', key: 'createdAt' },
+            { label: 'Updated At', key: 'updatedAt' }
+          ];
+          track item.key
+        ) {
+          @if (refundDetails[item.key] !== undefined && refundDetails[item.key] !== null) {
+            <div class="detail-item">
+              <span>{{ item.label }}</span>
+              <strong>{{ refundDetails[item.key] }}</strong>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="details-actions">
+        <button
+          type="button"
+          class="primary-button"
+          (click)="approveRefund()"
+          [disabled]="approving || loading || ['APPROVED', 'COMPLETED', 'SUCCESS', 'PROCESSED'].includes(getRefundStatus().toUpperCase())"
+        >
+          {{ approving ? 'Approving...' : 'Approve Refund' }}
+        </button>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">↗</div>
+        <h3>No refund selected</h3>
+        <p>Enter a refund ID above and select Search Refund to view its details.</p>
+      </div>
+    }
+  </section>
+
+  <footer class="page-footer">
+    Refund information and approval status are based on the Premium Service backend response.
+  </footer>
+</div>

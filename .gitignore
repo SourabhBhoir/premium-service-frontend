@@ -42,3 +42,11 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+node_modules/
+dist/
+.angular/
+coverage/
+.env
+.env.*
+!.env.example
